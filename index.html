@@ -3,166 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Змейка</title>
+    <title>Морской бой</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            background-color: #f0f0f0;
             margin: 0;
         }
-        canvas {
-            background-color: #222;
-            border: 1px solid #fff;
+        .container {
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
         }
-        .score {
-            color: #fff;
+        .board {
+            display: grid;
+            grid-template-columns: repeat(10, 40px);
+            grid-template-rows: repeat(10, 40px);
+            gap: 1px;
+            background-color: #333;
+            margin: 0 10px;
+        }
+        .board div {
+            width: 40px;
+            height: 40px;
+            background-color: #e1e1e1;
+            border: 1px solid #bbb;
+            cursor: pointer;
+        }
+        .ship {
+            background-color: #555;
+        }
+        .hit {
+            background-color: red;
+        }
+        .miss {
+            background-color: blue;
+        }
+        .game-status {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-left: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .turn {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        .player-name {
             font-size: 20px;
-            position: absolute;
-            top: 10px;
-            left: 10px;
+            font-weight: bold;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
 
-<canvas id="gameCanvas" width="400" height="400"></canvas>
-<div class="score">Счет: <span id="score">0</span></div>
+<div class="container">
+    <div class="board" id="boardPlayer1"></div>
+    <div class="game-status">
+        <div class="player-name" id="player1Name">Игрок 1</div>
+        <div class="turn" id="turnInfo">Ход Игрока 1</div>
+        <button id="startGameBtn">Начать игру</button>
+    </div>
+    <div class="board" id="boardPlayer2"></div>
+</div>
 
 <script>
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
+    const boardSize = 10;
+    const ships = [4, 3, 2, 1]; // Длины кораблей
 
-    const scale = 20;
-    const rows = canvas.height / scale;
-    const columns = canvas.width / scale;
+    let currentPlayer = 1;
+    let player1Board = Array(boardSize).fill().map(() => Array(boardSize).fill(null));
+    let player2Board = Array(boardSize).fill().map(() => Array(boardSize).fill(null));
 
-    let score = 0;
-    let snake;
-    let fruit;
+    let player1Ships = [...ships];
+    let player2Ships = [...ships];
+    let gameStarted = false;
 
-    (function setup() {
-        snake = new Snake();
-        fruit = new Fruit();
-        window.setInterval(game, 100);
-    })();
+    const boardPlayer1 = document.getElementById("boardPlayer1");
+    const boardPlayer2 = document.getElementById("boardPlayer2");
+    const turnInfo = document.getElementById("turnInfo");
+    const startGameBtn = document.getElementById("startGameBtn");
 
-    function game() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        snake.update();
-        snake.draw();
-        fruit.draw();
+    const player1Name = document.getElementById("player1Name");
 
-        if (snake.eat(fruit)) {
-            score++;
-            document.getElementById('score').textContent = score;
-            fruit.randomize();
-        }
+    startGameBtn.addEventListener('click', startGame);
 
-        if (snake.collide()) {
-            snake = new Snake();
-            score = 0;
-            document.getElementById('score').textContent = score;
+    function createBoard(player) {
+        const board = player === 1 ? player1Board : player2Board;
+        const boardElement = player === 1 ? boardPlayer1 : boardPlayer2;
+        boardElement.innerHTML = '';
+
+        for (let row = 0; row < boardSize; row++) {
+            for (let col = 0; col < boardSize; col++) {
+                const cell = document.createElement('div');
+                cell.dataset.row = row;
+                cell.dataset.col = col;
+                cell.addEventListener('click', () => handleCellClick(player, row, col));
+                boardElement.appendChild(cell);
+            }
         }
     }
 
-    function Snake() {
-        this.snakeArray = [{ x: 2, y: 2 }];
-        this.length = 1;
-        this.direction = 'RIGHT';
-        this.newDirection = 'RIGHT';
+    function startGame() {
+        gameStarted = false;
+        player1Ships = [...ships];
+        player2Ships = [...ships];
+        player1Board = Array(boardSize).fill().map(() => Array(boardSize).fill(null));
+        player2Board = Array(boardSize).fill().map(() => Array(boardSize).fill(null));
 
-        this.update = function () {
-            const head = { x: this.snakeArray[0].x, y: this.snakeArray[0].y };
+        currentPlayer = 1;
+        player1Name.textContent = "Игрок 1";
+        turnInfo.textContent = "Ход Игрока 1";
 
-            this.direction = this.newDirection;
+        createBoard(1);
+        createBoard(2);
+        startGameBtn.style.display = 'none';
+    }
 
-            switch (this.direction) {
-                case 'UP':
-                    head.y--;
-                    break;
-                case 'DOWN':
-                    head.y++;
-                    break;
-                case 'LEFT':
-                    head.x--;
-                    break;
-                case 'RIGHT':
-                    head.x++;
-                    break;
-            }
-
-            this.snakeArray.unshift(head);
-
-            if (this.snakeArray.length > this.length) {
-                this.snakeArray.pop();
-            }
-        };
-
-        this.draw = function () {
-            this.snakeArray.forEach((segment, index) => {
-                ctx.fillStyle = index === 0 ? "#00FF00" : "#FFFFFF";
-                ctx.fillRect(segment.x * scale, segment.y * scale, scale, scale);
-            });
-        };
-
-        this.eat = function (fruit) {
-            if (this.snakeArray[0].x === fruit.x && this.snakeArray[0].y === fruit.y) {
-                this.length++;
-                return true;
-            }
-            return false;
-        };
-
-        this.collide = function () {
-            const head = this.snakeArray[0];
-            if (head.x < 0 || head.x >= columns || head.y < 0 || head.y >= rows) {
-                return true;
-            }
-
-            for (let i = 1; i < this.snakeArray.length; i++) {
-                if (head.x === this.snakeArray[i].x && head.y === this.snakeArray[i].y) {
-                    return true;
+    function handleCellClick(player, row, col) {
+        if (gameStarted) {
+            if (player === currentPlayer) {
+                if (currentPlayer === 1 && player2Board[row][col] === null) {
+                    player2Board[row][col] = 'miss';
+                    document.querySelector(`#boardPlayer2 div[data-row="${row}"][data-col="${col}"]`).classList.add('miss');
+                    currentPlayer = 2;
+                    player1Name.textContent = "Игрок 2";
+                    turnInfo.textContent = "Ход Игрока 2";
+                } else if (currentPlayer === 2 && player1Board[row][col] === null) {
+                    player1Board[row][col] = 'miss';
+                    document.querySelector(`#boardPlayer1 div[data-row="${row}"][data-col="${col}"]`).classList.add('miss');
+                    currentPlayer = 1;
+                    player1Name.textContent = "Игрок 1";
+                    turnInfo.textContent = "Ход Игрока 1";
                 }
             }
-            return false;
-        };
-
-        this.changeDirection = function (event) {
-            const key = event.keyCode;
-            if (key === 37 && this.direction !== 'RIGHT') {
-                this.newDirection = 'LEFT';
-            } else if (key === 38 && this.direction !== 'DOWN') {
-                this.newDirection = 'UP';
-            } else if (key === 39 && this.direction !== 'LEFT') {
-                this.newDirection = 'RIGHT';
-            } else if (key === 40 && this.direction !== 'UP') {
-                this.newDirection = 'DOWN';
+        } else {
+            if (currentPlayer === 1 && player1Board[row][col] === null && player1Ships.length > 0) {
+                placeShip(player, row, col);
             }
-        };
+        }
     }
 
-    function Fruit() {
-        this.x = Math.floor(Math.random() * columns);
-        this.y = Math.floor(Math.random() * rows);
-
-        this.randomize = function () {
-            this.x = Math.floor(Math.random() * columns);
-            this.y = Math.floor(Math.random() * rows);
-        };
-
-        this.draw = function () {
-            ctx.fillStyle = "#FF0000";
-            ctx.fillRect(this.x * scale, this.y * scale, scale, scale);
-        };
+    function placeShip(player, row, col) {
+        const shipLength = player === 1 ? player1Ships[0] : player2Ships[0];
+        if (isShipPlacementValid(player, row, col, shipLength)) {
+            for (let i = 0; i < shipLength; i++) {
+                player === 1 ? player1Board[row + i][col] = 'ship' : player2Board[row + i][col] = 'ship';
+                const cell = document.querySelector(`#boardPlayer1 div[data-row="${row + i}"][data-col="${col}"]`);
+                cell.classList.add('ship');
+            }
+            player === 1 ? player1Ships.shift() : player2Ships.shift();
+            if (player === 1) {
+                currentPlayer = 2;
+                player1Name.textContent = "Игрок 2";
+                turnInfo.textContent = "Ход Игрока 2";
+            } else {
+                currentPlayer = 1;
+                player1Name.textContent = "Игрок 1";
+                turnInfo.textContent = "Ход Игрока 1";
+                gameStarted = true;
+                startGameBtn.style.display = 'block';
+            }
+        }
     }
 
-    document.addEventListener('keydown', function (event) {
-        snake.changeDirection(event);
-    });
+    function isShipPlacementValid(player, row, col, length) {
+        if (row + length > boardSize) return false; // Проверка выхода за границу поля
+        for (let i = 0; i < length; i++) {
+            const board = player === 1 ? player1Board : player2Board;
+            if (board[row + i][col] !== null) return false; // Проверка на занятость клетки
+        }
+        return true;
+    }
+
+    // Инициализация игры
+    startGame();
 </script>
 
 </body>
