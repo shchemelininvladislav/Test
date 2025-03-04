@@ -1,121 +1,145 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Бегущий бородатый азиат</title>
+    <title>Бегущий человек</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
-            background: linear-gradient(to bottom, #87CEEB, #ffffff);
+            background: skyblue;
         }
-        .scene {
-            width: 100vw;
-            height: 100vh;
-            position: relative;
-            overflow: hidden;
-        }
-        .background {
-            position: absolute;
-            width: 200%;
-            height: 100%;
-            background-size: cover;
-            animation: moveBackground 4s linear infinite;
-        }
-        @keyframes moveBackground {
-            from { transform: translateX(0); }
-            to { transform: translateX(-50%); }
-        }
-        .runner {
-            position: absolute;
-            bottom: 50px;
-            left: 10%;
-            width: 120px;
-            height: 200px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            animation: run 1s steps(4) infinite;
-        }
-        .head {
-            width: 50px;
-            height: 50px;
-            background-color: #ffcc99;
-            border-radius: 50%;
-            position: relative;
-        }
-        .beard {
-            position: absolute;
-            width: 30px;
-            height: 20px;
-            background: #5a3728;
-            bottom: 5px;
-            left: 10px;
-            border-radius: 50%;
-        }
-        .eye {
-            width: 8px;
-            height: 8px;
-            background: black;
-            border-radius: 50%;
-            position: absolute;
-            top: 15px;
-        }
-        .eye.left { left: 10px; }
-        .eye.right { right: 10px; }
-        .body {
-            width: 60px;
-            height: 80px;
-            background: #3498db;
-            position: relative;
-            border-radius: 10px;
-        }
-        .arm {
-            width: 12px;
-            height: 50px;
-            background: #ffcc99;
-            position: absolute;
-            top: 10px;
-            transform-origin: top;
-        }
-        .arm.left { left: -15px; animation: swing 0.5s alternate infinite ease-in-out; }
-        .arm.right { right: -15px; animation: swing 0.5s alternate infinite ease-in-out reverse; }
-        .leg {
-            width: 14px;
-            height: 60px;
-            background: #222;
-            position: absolute;
-            bottom: -30px;
-            transform-origin: top;
-        }
-        .leg.left { left: 10px; animation: runLeg 0.5s alternate infinite ease-in-out; }
-        .leg.right { right: 10px; animation: runLeg 0.5s alternate infinite ease-in-out reverse; }
-        @keyframes swing {
-            0% { transform: rotate(20deg); }
-            100% { transform: rotate(-20deg); }
-        }
-        @keyframes runLeg {
-            0% { transform: rotate(30deg); }
-            100% { transform: rotate(-30deg); }
+        canvas {
+            display: block;
         }
     </style>
 </head>
 <body>
-    <div class="scene">
-        <div class="background"></div>
-        <div class="runner">
-            <div class="head">
-                <div class="eye left"></div>
-                <div class="eye right"></div>
-                <div class="beard"></div>
-            </div>
-            <div class="body"></div>
-            <div class="arm left"></div>
-            <div class="arm right"></div>
-            <div class="leg left"></div>
-            <div class="leg right"></div>
-        </div>
-    </div>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let frame = 0;
+        let groundY = canvas.height - 100;
+        let trees = [{ x: 300 }, { x: 700 }, { x: 1100 }];
+
+        class Runner {
+            constructor() {
+                this.x = 200;
+                this.y = groundY - 50;
+                this.speed = 3;
+                this.legAngle = 0;
+                this.armAngle = 0;
+            }
+
+            draw() {
+                ctx.fillStyle = "black";
+                ctx.strokeStyle = "black";
+                ctx.lineWidth = 4;
+
+                // Голова
+                ctx.beginPath();
+                ctx.arc(this.x, this.y - 40, 20, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Борода
+                ctx.fillStyle = "brown";
+                ctx.beginPath();
+                ctx.moveTo(this.x - 10, this.y - 25);
+                ctx.lineTo(this.x, this.y);
+                ctx.lineTo(this.x + 10, this.y - 25);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.fillStyle = "black";
+
+                // Тело
+                ctx.beginPath();
+                ctx.moveTo(this.x - 10, this.y - 20);
+                ctx.lineTo(this.x - 15, this.y + 20);
+                ctx.lineTo(this.x + 15, this.y + 20);
+                ctx.lineTo(this.x + 10, this.y - 20);
+                ctx.closePath();
+                ctx.fill();
+
+                // Руки
+                ctx.save();
+                ctx.translate(this.x - 12, this.y - 10);
+                ctx.rotate(Math.sin(this.armAngle) * 0.8);
+                ctx.fillRect(-5, 0, 10, 30);
+                ctx.restore();
+
+                ctx.save();
+                ctx.translate(this.x + 12, this.y - 10);
+                ctx.rotate(-Math.sin(this.armAngle) * 0.8);
+                ctx.fillRect(-5, 0, 10, 30);
+                ctx.restore();
+
+                // Ноги
+                ctx.save();
+                ctx.translate(this.x - 5, this.y + 20);
+                ctx.rotate(Math.sin(this.legAngle) * 1.2);
+                ctx.fillRect(-5, 0, 10, 30);
+                ctx.restore();
+
+                ctx.save();
+                ctx.translate(this.x + 5, this.y + 20);
+                ctx.rotate(-Math.sin(this.legAngle) * 1.2);
+                ctx.fillRect(-5, 0, 10, 30);
+                ctx.restore();
+            }
+
+            update() {
+                this.legAngle += 0.15;
+                this.armAngle += 0.15;
+            }
+        }
+
+        const runner = new Runner();
+
+        function drawBackground() {
+            ctx.fillStyle = "green";
+            ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
+
+            ctx.fillStyle = "yellow";
+            ctx.beginPath();
+            ctx.arc(canvas.width - 100, 100, 40, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = "white";
+            for (let i = 0; i < 5; i++) {
+                let x = i * 200 + (frame % 200);
+                ctx.beginPath();
+                ctx.arc(x, 80, 30, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.fillStyle = "darkgreen";
+            trees.forEach(tree => {
+                tree.x -= 2;
+                if (tree.x < -50) tree.x = canvas.width + Math.random() * 300;
+                ctx.fillRect(tree.x, groundY - 60, 20, 60);
+                ctx.beginPath();
+                ctx.arc(tree.x + 10, groundY - 80, 30, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBackground();
+            runner.update();
+            runner.draw();
+            frame++;
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
 </body>
 </html>
