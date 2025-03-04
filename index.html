@@ -1,188 +1,24 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background: #87CEEB;
-        }
-
-        .scene {
-            width: 100vw;
-            height: 100vh;
-            position: relative;
-        }
-
-        /* Фоновые элементы */
-        .sun {
-            width: 80px;
-            height: 80px;
-            background: #FFD700;
-            border-radius: 50%;
-            position: absolute;
-            top: 20px;
-            right: 20px;
-        }
-
-        .cloud {
-            width: 120px;
-            height: 40px;
-            background: white;
-            border-radius: 20px;
-            position: absolute;
-            animation: cloudMove 20s linear infinite;
-        }
-
-        .tree {
-            position: absolute;
-            bottom: 100px;
-            width: 40px;
-            height: 100px;
-            background: #2E8B57;
-            clip-path: polygon(0 100%, 100% 100%, 90% 0, 10% 0);
-            animation: treeMove 8s linear infinite;
-        }
-
-        /* Персонаж */
-        .runner {
-            position: absolute;
-            bottom: 100px;
-            left: 30%;
-            transform-origin: bottom;
-            z-index: 1000;
-        }
-
-        .head {
-            width: 40px;
-            height: 40px;
-            background: #FFD8A8;
-            border-radius: 50%;
-            position: absolute;
-            z-index: 2;
-        }
-
-        .beard {
-            width: 30px;
-            height: 20px;
-            background: #333;
-            position: absolute;
-            bottom: -5px;
-            left: 5px;
-            border-radius: 0 0 15px 15px;
-        }
-
-        .body {
-            width: 30px;
-            height: 60px;
-            background: #1E90FF;
-            position: absolute;
-            top: 35px;
-            left: 5px;
-            border-radius: 10px;
-        }
-
-        .limb {
-            background: #FFD8A8;
-            position: absolute;
-            transform-origin: top;
-        }
-
-        .arm {
-            width: 8px;
-            height: 40px;
-        }
-
-        .leg {
-            width: 10px;
-            height: 50px;
-        }
-
-        /* Анимации */
-        @keyframes run {
-            0%, 100% { transform: rotate(0deg); }
-            50% { transform: rotate(-5deg); }
-        }
-
-        @keyframes cloudMove {
-            from { left: -150px; }
-            to { left: 100%; }
-        }
-
-        @keyframes treeMove {
-            from { right: -50px; }
-            to { right: 100%; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Бег по полю</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="scene">
-        <div class="sun"></div>
-        <div class="cloud" style="top: 50px; animation-duration: 25s;"></div>
-        <div class="cloud" style="top: 150px; animation-duration: 30s;"></div>
-        
-        <div class="runner">
-            <!-- Голова -->
-            <div class="head">
-                <div class="beard"></div>
-            </div>
-            
-            <!-- Тело -->
-            <div class="body"></div>
-            
-            <!-- Руки -->
-            <div class="limb arm left-arm" style="left: -5px; top: 40px; transform: rotate(45deg);"></div>
-            <div class="limb arm right-arm" style="right: -5px; top: 40px; transform: rotate(-45deg);"></div>
-            
-            <!-- Ноги -->
-            <div class="limb leg left-leg" style="left: 5px; top: 90px; transform: rotate(-20deg);"></div>
-            <div class="limb leg right-leg" style="right: 5px; top: 90px; transform: rotate(20deg);"></div>
-        </div>
-        
-        <!-- Поле -->
-        <div style="position: absolute; bottom: 0; width: 100%; height: 100px; background: #7CFC00;"></div>
-    </div>
-
-    <script>
-        const runner = document.querySelector('.runner');
-        const leftArm = document.querySelector('.left-arm');
-        const rightArm = document.querySelector('.right-arm');
-        const leftLeg = document.querySelector('.left-leg');
-        const rightLeg = document.querySelector('.right-leg');
-
-        let angle = 0;
-        
-        function animate() {
-            angle = (angle + 5) % 360;
-            
-            // Анимация рук
-            leftArm.style.transform = `rotate(${45 + Math.sin(angle * Math.PI / 180) * 30}deg)`;
-            rightArm.style.transform = `rotate(${-45 + Math.sin(angle * Math.PI / 180 + Math.PI) * 30}deg)`;
-            
-            // Анимация ног
-            leftLeg.style.transform = `rotate(${-20 + Math.sin(angle * Math.PI / 180 + Math.PI) * 30}deg)`;
-            rightLeg.style.transform = `rotate(${20 + Math.sin(angle * Math.PI / 180) * 30}deg)`;
-            
-            // Анимация всего тела
-            runner.style.transform = `translateY(${Math.sin(angle * Math.PI / 90) * 10}px)`;
-            
-            requestAnimationFrame(animate);
-        }
-
-        // Создание деревьев
-        function createTrees() {
-            const scene = document.querySelector('.scene');
-            for(let i = 0; i < 8; i++) {
-                const tree = document.createElement('div');
-                tree.className = 'tree';
-                tree.style.right = `${Math.random() * 100}%`;
-                tree.style.animationDelay = `${Math.random() * -8}s`;
-                scene.appendChild(tree);
-            }
-        }
-
-        createTrees();
-        animate();
-    </script>
+  <div class="sky"></div>
+  <div class="field">
+    <div class="cloud cloud-1"></div>
+    <div class="cloud cloud-2"></div>
+    <div class="tree tree-1"></div>
+    <div class="tree tree-2"></div>
+    <div class="runner"></div>
+  </div>
+  <div class="controls">
+    <button id="startStopBtn">Старт/Стоп</button>
+    <input type="range" id="speedControl" min="1" max="10" value="5">
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
