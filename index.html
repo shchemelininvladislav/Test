@@ -1,103 +1,228 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Бегущий человек</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <style>
-        body { margin: 0; overflow: hidden; background: #87CEEB; }
-        canvas { display: block; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Бегущий человек</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100%;
+      background: linear-gradient(180deg, #87CEEB, #E0F6FF);
+    }
+
+    .scene {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .runner {
+      position: absolute;
+      bottom: 10%;
+      left: 20%;
+      width: 100px;
+      height: 200px;
+      transform-origin: bottom;
+    }
+
+    .leg, .arm {
+      position: absolute;
+      background: #333;
+      width: 10px;
+      height: 60px;
+      transform-origin: top;
+    }
+
+    .leg-left {
+      left: 30px;
+      top: 100px;
+      transform: rotate(20deg);
+    }
+
+    .leg-right {
+      left: 60px;
+      top: 100px;
+      transform: rotate(-20deg);
+    }
+
+    .arm-left {
+      left: 20px;
+      top: 50px;
+      transform: rotate(-30deg);
+    }
+
+    .arm-right {
+      left: 70px;
+      top: 50px;
+      transform: rotate(30deg);
+    }
+
+    .body {
+      position: absolute;
+      background: #555;
+      width: 20px;
+      height: 80px;
+      left: 40px;
+      top: 70px;
+    }
+
+    .head {
+      position: absolute;
+      background: #777;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      left: 35px;
+      top: 30px;
+    }
+
+    .ground {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 10%;
+      background: #4CAF50;
+    }
+
+    .tree {
+      position: absolute;
+      bottom: 10%;
+      width: 20px;
+      height: 100px;
+      background: #8B4513;
+    }
+
+    .tree::before {
+      content: '';
+      position: absolute;
+      top: -50px;
+      left: -30px;
+      width: 80px;
+      height: 80px;
+      background: #228B22;
+      border-radius: 50%;
+    }
+
+    .tree1 {
+      left: 10%;
+    }
+
+    .tree2 {
+      left: 40%;
+    }
+
+    .tree3 {
+      left: 70%;
+    }
+
+    .sun {
+      position: absolute;
+      top: 10%;
+      left: 80%;
+      width: 50px;
+      height: 50px;
+      background: #FFD700;
+      border-radius: 50%;
+      box-shadow: 0 0 50px #FFD700;
+    }
+
+    @keyframes run {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    @keyframes legSwingLeft {
+      0%, 100% {
+        transform: rotate(20deg);
+      }
+      50% {
+        transform: rotate(-20deg);
+      }
+    }
+
+    @keyframes legSwingRight {
+      0%, 100% {
+        transform: rotate(-20deg);
+      }
+      50% {
+        transform: rotate(20deg);
+      }
+    }
+
+    @keyframes armSwingLeft {
+      0%, 100% {
+        transform: rotate(-30deg);
+      }
+      50% {
+        transform: rotate(30deg);
+      }
+    }
+
+    @keyframes armSwingRight {
+      0%, 100% {
+        transform: rotate(30deg);
+      }
+      50% {
+        transform: rotate(-30deg);
+      }
+    }
+
+    @keyframes moveBackground {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(-100%);
+      }
+    }
+
+    .runner {
+      animation: run 0.5s infinite ease-in-out;
+    }
+
+    .leg-left {
+      animation: legSwingLeft 0.5s infinite ease-in-out;
+    }
+
+    .leg-right {
+      animation: legSwingRight 0.5s infinite ease-in-out;
+    }
+
+    .arm-left {
+      animation: armSwingLeft 0.5s infinite ease-in-out;
+    }
+
+    .arm-right {
+      animation: armSwingRight 0.5s infinite ease-in-out;
+    }
+
+    .tree1, .tree2, .tree3 {
+      animation: moveBackground 10s infinite linear;
+    }
+  </style>
 </head>
 <body>
-
-<script>
-    // 1️⃣ Создаём сцену, камеру и рендерер
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-
-    // 2️⃣ Создаём землю
-    const groundGeometry = new THREE.PlaneGeometry(100, 20);
-    const groundMaterial = new THREE.MeshBasicMaterial({ color: 0x228B22 });
-    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-    ground.rotation.x = -Math.PI / 2;
-    scene.add(ground);
-
-    // 3️⃣ Добавляем солнце
-    const sun = new THREE.PointLight(0xffd700, 2, 100);
-    sun.position.set(10, 10, 10);
-    scene.add(sun);
-
-    // 4️⃣ Создаём кости человека
-    function createLimb(length, color = 0xffa500) {
-        const geometry = new THREE.CylinderGeometry(0.3, 0.3, length, 16);
-        const material = new THREE.MeshStandardMaterial({ color });
-        return new THREE.Mesh(geometry, material);
-    }
-
-    const upperLegR = createLimb(3);
-    upperLegR.position.set(-1, 3, 0);
-    const lowerLegR = createLimb(3);
-    lowerLegR.position.set(-1, 0, 0);
-    
-    const upperLegL = createLimb(3);
-    upperLegL.position.set(1, 3, 0);
-    const lowerLegL = createLimb(3);
-    lowerLegL.position.set(1, 0, 0);
-
-    const upperArmR = createLimb(2, 0xff4500);
-    upperArmR.position.set(-2, 6, 0);
-    const lowerArmR = createLimb(2, 0xff4500);
-    lowerArmR.position.set(-2, 4, 0);
-    
-    const upperArmL = createLimb(2, 0xff4500);
-    upperArmL.position.set(2, 6, 0);
-    const lowerArmL = createLimb(2, 0xff4500);
-    lowerArmL.position.set(2, 4, 0);
-
-    // 5️⃣ Создаём тело и голову
-    const body = createLimb(5, 0x0000ff);
-    body.position.set(0, 5, 0);
-    const head = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 16), new THREE.MeshStandardMaterial({ color: 0xffd700 }));
-    head.position.set(0, 8, 0);
-
-    // 6️⃣ Группируем части тела
-    const runner = new THREE.Group();
-    runner.add(upperLegR, lowerLegR, upperLegL, lowerLegL, upperArmR, lowerArmR, upperArmL, lowerArmL, body, head);
-    scene.add(runner);
-
-    // 7️⃣ Анимация бега
-    let frame = 0;
-    function animateRunner() {
-        frame += 0.1;
-        upperLegR.rotation.x = Math.sin(frame) * 0.5;
-        lowerLegR.rotation.x = Math.cos(frame) * 0.5;
-        upperLegL.rotation.x = Math.cos(frame) * 0.5;
-        lowerLegL.rotation.x = Math.sin(frame) * 0.5;
-
-        upperArmR.rotation.x = -Math.sin(frame) * 0.5;
-        lowerArmR.rotation.x = -Math.cos(frame) * 0.5;
-        upperArmL.rotation.x = -Math.cos(frame) * 0.5;
-        lowerArmL.rotation.x = -Math.sin(frame) * 0.5;
-    }
-
-    // 8️⃣ Позиция камеры
-    camera.position.set(0, 6, 15);
-    camera.lookAt(0, 5, 0);
-
-    // 9️⃣ Главный цикл
-    function animate() {
-        requestAnimationFrame(animate);
-        animateRunner();
-        renderer.render(scene, camera);
-    }
-    animate();
-
-</script>
-
+  <div class="scene">
+    <div class="runner">
+      <div class="head"></div>
+      <div class="body"></div>
+      <div class="leg leg-left"></div>
+      <div class="leg leg-right"></div>
+      <div class="arm arm-left"></div>
+      <div class="arm arm-right"></div>
+    </div>
+    <div class="ground"></div>
+    <div class="tree tree1"></div>
+    <div class="tree tree2"></div>
+    <div class="tree tree3"></div>
+    <div class="sun"></div>
+  </div>
 </body>
 </html>
