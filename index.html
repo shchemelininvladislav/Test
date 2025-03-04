@@ -3,123 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Анимация приветствия</title>
+    <title>Бегущий бородатый азиат</title>
     <style>
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: linear-gradient(to bottom, #87CEEB, #ffffff);
             margin: 0;
             overflow: hidden;
+            background: linear-gradient(to bottom, #87CEEB, #ffffff);
         }
-        .character {
+        .scene {
+            width: 100vw;
+            height: 100vh;
             position: relative;
-            width: 150px;
-            height: 250px;
+            overflow: hidden;
+        }
+        .background {
+            position: absolute;
+            width: 200%;
+            height: 100%;
+            background: url('https://i.imgur.com/3cI5zO2.png') repeat-x;
+            background-size: cover;
+            animation: moveBackground 4s linear infinite;
+        }
+        @keyframes moveBackground {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+        .runner {
+            position: absolute;
+            bottom: 50px;
+            left: 10%;
+            width: 120px;
+            height: 200px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            animation: run 1s steps(4) infinite;
         }
         .head {
-            width: 70px;
-            height: 70px;
-            background-color: #ffcc99;
-            border-radius: 50%;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.2);
-        }
-        .eye {
-            width: 10px;
-            height: 10px;
-            background-color: black;
-            border-radius: 50%;
-            position: absolute;
-            top: 25px;
-        }
-        .eye.left {
-            left: 18px;
-        }
-        .eye.right {
-            right: 18px;
-        }
-        .mouth {
-            width: 20px;
-            height: 10px;
-            background-color: transparent;
-            border-bottom: 3px solid black;
-            border-radius: 50%;
-            position: absolute;
-            bottom: 10px;
-        }
-        .body {
-            width: 90px;
-            height: 120px;
-            background-color: #3498db;
-            position: relative;
-            border-radius: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 5px 0 rgba(0, 0, 0, 0.2);
-        }
-        .hand {
-            width: 15px;
+            width: 50px;
             height: 50px;
             background-color: #ffcc99;
+            border-radius: 50%;
+            position: relative;
+        }
+        .beard {
             position: absolute;
+            width: 30px;
+            height: 20px;
+            background: #5a3728;
+            bottom: 5px;
+            left: 10px;
+            border-radius: 50%;
         }
-        .hand.left {
-            left: -25px;
-            top: 30px;
-            transform: rotate(10deg);
+        .eye {
+            width: 8px;
+            height: 8px;
+            background: black;
+            border-radius: 50%;
+            position: absolute;
+            top: 15px;
         }
-        .hand.right {
-            right: -25px;
-            top: 30px;
-            transform-origin: top;
-            animation: wave 0.6s ease-in-out infinite alternate;
-        }
-        .legs {
-            display: flex;
-            justify-content: space-between;
+        .eye.left { left: 10px; }
+        .eye.right { right: 10px; }
+        .body {
             width: 60px;
+            height: 80px;
+            background: #3498db;
+            position: relative;
+            border-radius: 10px;
+        }
+        .arm {
+            width: 12px;
+            height: 50px;
+            background: #ffcc99;
             position: absolute;
-            top: 220px;
+            top: 10px;
+            transform-origin: top;
         }
+        .arm.left { left: -15px; animation: swing 0.5s alternate infinite ease-in-out; }
+        .arm.right { right: -15px; animation: swing 0.5s alternate infinite ease-in-out reverse; }
         .leg {
-            width: 15px;
-            height: 40px;
-            background-color: #222;
-            border-radius: 5px;
+            width: 14px;
+            height: 60px;
+            background: #222;
+            position: absolute;
+            bottom: -30px;
+            transform-origin: top;
         }
-        @keyframes wave {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(30deg);
-            }
+        .leg.left { left: 10px; animation: runLeg 0.5s alternate infinite ease-in-out; }
+        .leg.right { right: 10px; animation: runLeg 0.5s alternate infinite ease-in-out reverse; }
+        @keyframes swing {
+            0% { transform: rotate(20deg); }
+            100% { transform: rotate(-20deg); }
+        }
+        @keyframes runLeg {
+            0% { transform: rotate(30deg); }
+            100% { transform: rotate(-30deg); }
         }
     </style>
 </head>
 <body>
-    <div class="character">
-        <div class="head">
-            <div class="eye left"></div>
-            <div class="eye right"></div>
-            <div class="mouth"></div>
-        </div>
-        <div class="body"></div>
-        <div class="hand left"></div>
-        <div class="hand right"></div>
-        <div class="legs">
-            <div class="leg"></div>
-            <div class="leg"></div>
+    <div class="scene">
+        <div class="background"></div>
+        <div class="runner">
+            <div class="head">
+                <div class="eye left"></div>
+                <div class="eye right"></div>
+                <div class="beard"></div>
+            </div>
+            <div class="body"></div>
+            <div class="arm left"></div>
+            <div class="arm right"></div>
+            <div class="leg left"></div>
+            <div class="leg right"></div>
         </div>
     </div>
 </body>
