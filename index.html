@@ -3,15 +3,220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Главная страница</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Игры в одном файле</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        header {
+            margin-bottom: 20px;
+        }
+        nav button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+        nav button:hover {
+            background-color: #45a049;
+        }
+        .game-container {
+            display: none;
+            text-align: center;
+        }
+        .tic-tac-toe, .minesweeper, .puzzle {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        .tic-tac-toe button, .minesweeper button {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+        .puzzle img {
+            width: 100px;
+            height: 100px;
+            margin: 5px;
+        }
+        .puzzle-container {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            gap: 5px;
+        }
+    </style>
 </head>
 <body>
 
-    <div class="container">
-        <button id="showTimeButton">Время</button>
+    <header>
+        <h1>Игры в одном файле</h1>
+        <nav>
+            <button onclick="showGame('ticTacToe')">Тик-Так-Тое</button>
+            <button onclick="showGame('minesweeper')">Сапер</button>
+            <button onclick="showGame('puzzle')">Головоломка</button>
+        </nav>
+    </header>
+
+    <div id="ticTacToe" class="game-container tic-tac-toe">
+        <h2>Тик-Так-Тое</h2>
+        <div id="ticTacToeBoard"></div>
+        <button onclick="startTicTacToe()">Новая игра</button>
     </div>
 
-    <script src="script.js"></script>
+    <div id="minesweeper" class="game-container minesweeper">
+        <h2>Сапер</h2>
+        <div id="minesweeperBoard"></div>
+        <button onclick="startMinesweeper()">Новая игра</button>
+    </div>
+
+    <div id="puzzle" class="game-container puzzle">
+        <h2>Головоломка</h2>
+        <div id="puzzleBoard" class="puzzle-container"></div>
+        <button onclick="startPuzzle()">Новая игра</button>
+    </div>
+
+    <script>
+        // Тик-Так-Тое (Tic-Tac-Toe)
+        function startTicTacToe() {
+            let board = ['','','','','','','','',''];
+            let turn = 'X';
+            const ticTacToeBoard = document.getElementById('ticTacToeBoard');
+            ticTacToeBoard.innerHTML = '';
+            board.forEach((cell, index) => {
+                let button = document.createElement('button');
+                button.innerText = cell;
+                button.onclick = () => makeMove(index);
+                ticTacToeBoard.appendChild(button);
+            });
+
+            function makeMove(index) {
+                if (board[index] === '') {
+                    board[index] = turn;
+                    turn = turn === 'X' ? 'O' : 'X';
+                    renderBoard();
+                    if (checkWinner(board)) {
+                        alert(`${checkWinner(board)} победил!`);
+                    }
+                }
+            }
+
+            function renderBoard() {
+                Array.from(ticTacToeBoard.children).forEach((button, index) => {
+                    button.innerText = board[index];
+                });
+            }
+
+            function checkWinner(board) {
+                const winningCombinations = [
+                    [0, 1, 2], [3, 4, 5], [6, 7, 8], // горизонтали
+                    [0, 3, 6], [1, 4, 7], [2, 5, 8], // вертикали
+                    [0, 4, 8], [2, 4, 6]             // диагонали
+                ];
+                for (const [a, b, c] of winningCombinations) {
+                    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                        return board[a];
+                    }
+                }
+                return null;
+            }
+        }
+
+        // Сапер (Minesweeper)
+        function startMinesweeper() {
+            const rows = 5;
+            const cols = 5;
+            const mines = 5;
+            let board = Array.from({ length: rows }, () => Array(cols).fill(0));
+
+            // Randomly place mines
+            let minesPlaced = 0;
+            while (minesPlaced < mines) {
+                let randRow = Math.floor(Math.random() * rows);
+                let randCol = Math.floor(Math.random() * cols);
+                if (board[randRow][randCol] !== 'X') {
+                    board[randRow][randCol] = 'X';
+                    minesPlaced++;
+                }
+            }
+
+            // Calculate numbers around mines
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    if (board[row][col] === 'X') continue;
+                    let mineCount = 0;
+                    for (let i = -1; i <= 1; i++) {
+                        for (let j = -1; j <= 1; j++) {
+                            let r = row + i, c = col + j;
+                            if (r >= 0 && r < rows && c >= 0 && c < cols && board[r][c] === 'X') {
+                                mineCount++;
+                            }
+                        }
+                    }
+                    board[row][col] = mineCount;
+                }
+            }
+
+            const minesweeperBoard = document.getElementById('minesweeperBoard');
+            minesweeperBoard.innerHTML = '';
+            board.forEach((row, rowIndex) => {
+                row.forEach((cell, colIndex) => {
+                    let button = document.createElement('button');
+                    button.innerText = '';
+                    button.onclick = () => revealCell(rowIndex, colIndex);
+                    minesweeperBoard.appendChild(button);
+                });
+            });
+
+            function revealCell(row, col) {
+                const index = row * cols + col;
+                const button = minesweeperBoard.children[index];
+                if (board[row][col] === 'X') {
+                    button.innerText = '💣';
+                    alert('Вы проиграли!');
+                } else {
+                    button.innerText = board[row][col] === 0 ? '' : board[row][col];
+                }
+            }
+        }
+
+        // Головоломка (Puzzle)
+        function startPuzzle() {
+            const images = ['1.jpg', '2.jpg', '3.jpg', '4.jpg', '5.jpg', '6.jpg', '7.jpg', '8.jpg'];
+            let shuffled = images.sort(() => Math.random() - 0.5);
+            const puzzleBoard = document.getElementById('puzzleBoard');
+            puzzleBoard.innerHTML = '';
+            shuffled.forEach(image => {
+                let img = document.createElement('img');
+                img.src = `https://via.placeholder.com/100x100?text=${image}`;
+                puzzleBoard.appendChild(img);
+            });
+        }
+
+        // Переключение между играми
+        function showGame(gameId) {
+            document.querySelectorAll('.game-container').forEach(game => {
+                game.style.display = 'none';
+            });
+            document.getElementById(gameId).style.display = 'block';
+        }
+    </script>
+
 </body>
 </html>
