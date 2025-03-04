@@ -5,141 +5,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Бегущий человек</title>
     <style>
-        body {
-            margin: 0;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #87CEEB; overflow: hidden; position: relative; }
+        
+        .scene {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: flex-end;
             overflow: hidden;
-            background: skyblue;
+            position: relative;
         }
-        canvas {
-            display: block;
+
+        /* Фон (деревья, солнце, трава) */
+        .background {
+            position: absolute;
+            width: 500%;
+            height: 100%;
+            background: linear-gradient(to bottom, #87CEEB 60%, #228B22 40%);
+            background-size: cover;
+            animation: moveBg 5s linear infinite;
+        }
+
+        @keyframes moveBg {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+
+        /* Бегущий человек */
+        .runner {
+            position: absolute;
+            bottom: 10%;
+            left: 20%;
+            width: 150px;
+            height: 220px;
+            animation: run 1s steps(8) infinite;
+        }
+
+        /* Фазы бега */
+        @keyframes run {
+            0% { transform: translateY(0) rotate(0); }
+            25% { transform: translateY(-5px) rotate(-1deg); }
+            50% { transform: translateY(0) rotate(0); }
+            75% { transform: translateY(5px) rotate(1deg); }
+            100% { transform: translateY(0) rotate(0); }
+        }
+
+        /* Человек (SVG) */
+        .runner svg {
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
 <body>
-    <canvas id="canvas"></canvas>
-    <script>
-        const canvas = document.getElementById("canvas");
-        const ctx = canvas.getContext("2d");
-
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        let frame = 0;
-        let groundY = canvas.height - 100;
-        let trees = [{ x: 300 }, { x: 700 }, { x: 1100 }];
-
-        class Runner {
-            constructor() {
-                this.x = 200;
-                this.y = groundY - 50;
-                this.speed = 3;
-                this.legAngle = 0;
-                this.armAngle = 0;
-            }
-
-            draw() {
-                ctx.fillStyle = "black";
-                ctx.strokeStyle = "black";
-                ctx.lineWidth = 4;
-
-                // Голова
-                ctx.beginPath();
-                ctx.arc(this.x, this.y - 40, 20, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Борода
-                ctx.fillStyle = "brown";
-                ctx.beginPath();
-                ctx.moveTo(this.x - 10, this.y - 25);
-                ctx.lineTo(this.x, this.y);
-                ctx.lineTo(this.x + 10, this.y - 25);
-                ctx.closePath();
-                ctx.fill();
-
-                ctx.fillStyle = "black";
-
-                // Тело
-                ctx.beginPath();
-                ctx.moveTo(this.x - 10, this.y - 20);
-                ctx.lineTo(this.x - 15, this.y + 20);
-                ctx.lineTo(this.x + 15, this.y + 20);
-                ctx.lineTo(this.x + 10, this.y - 20);
-                ctx.closePath();
-                ctx.fill();
-
-                // Руки
-                ctx.save();
-                ctx.translate(this.x - 12, this.y - 10);
-                ctx.rotate(Math.sin(this.armAngle) * 0.8);
-                ctx.fillRect(-5, 0, 10, 30);
-                ctx.restore();
-
-                ctx.save();
-                ctx.translate(this.x + 12, this.y - 10);
-                ctx.rotate(-Math.sin(this.armAngle) * 0.8);
-                ctx.fillRect(-5, 0, 10, 30);
-                ctx.restore();
-
-                // Ноги
-                ctx.save();
-                ctx.translate(this.x - 5, this.y + 20);
-                ctx.rotate(Math.sin(this.legAngle) * 1.2);
-                ctx.fillRect(-5, 0, 10, 30);
-                ctx.restore();
-
-                ctx.save();
-                ctx.translate(this.x + 5, this.y + 20);
-                ctx.rotate(-Math.sin(this.legAngle) * 1.2);
-                ctx.fillRect(-5, 0, 10, 30);
-                ctx.restore();
-            }
-
-            update() {
-                this.legAngle += 0.15;
-                this.armAngle += 0.15;
-            }
-        }
-
-        const runner = new Runner();
-
-        function drawBackground() {
-            ctx.fillStyle = "green";
-            ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
-
-            ctx.fillStyle = "yellow";
-            ctx.beginPath();
-            ctx.arc(canvas.width - 100, 100, 40, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.fillStyle = "white";
-            for (let i = 0; i < 5; i++) {
-                let x = i * 200 + (frame % 200);
-                ctx.beginPath();
-                ctx.arc(x, 80, 30, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            ctx.fillStyle = "darkgreen";
-            trees.forEach(tree => {
-                tree.x -= 2;
-                if (tree.x < -50) tree.x = canvas.width + Math.random() * 300;
-                ctx.fillRect(tree.x, groundY - 60, 20, 60);
-                ctx.beginPath();
-                ctx.arc(tree.x + 10, groundY - 80, 30, 0, Math.PI * 2);
-                ctx.fill();
-            });
-        }
-
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawBackground();
-            runner.update();
-            runner.draw();
-            frame++;
-            requestAnimationFrame(animate);
-        }
-
-        animate();
-    </script>
+    <div class="scene">
+        <div class="background"></div>
+        <div class="runner">
+            <svg viewBox="0 0 200 300">
+                <!-- Голова -->
+                <circle cx="100" cy="50" r="30" fill="#FFDAB9" stroke="#000" stroke-width="2"></circle>
+                <!-- Глаза -->
+                <circle cx="90" cy="45" r="4" fill="#000"></circle>
+                <circle cx="110" cy="45" r="4" fill="#000"></circle>
+                <!-- Брови -->
+                <line x1="85" y1="38" x2="95" y2="40" stroke="#000" stroke-width="2"></line>
+                <line x1="105" y1="40" x2="115" y2="38" stroke="#000" stroke-width="2"></line>
+                <!-- Борода -->
+                <path d="M80 60 Q100 90 120 60" fill="#654321"></path>
+                <!-- Тело -->
+                <rect x="80" y="80" width="40" height="70" fill="blue" stroke="#000" stroke-width="2"></rect>
+                <!-- Руки -->
+                <line x1="80" y1="90" x2="50" y2="130" stroke="#FFDAB9" stroke-width="6"></line>
+                <line x1="120" y1="90" x2="150" y2="130" stroke="#FFDAB9" stroke-width="6"></line>
+                <!-- Ноги -->
+                <line x1="90" y1="150" x2="80" y2="220" stroke="#000" stroke-width="8"></line>
+                <line x1="110" y1="150" x2="120" y2="220" stroke="#000" stroke-width="8"></line>
+            </svg>
+        </div>
+    </div>
 </body>
 </html>
