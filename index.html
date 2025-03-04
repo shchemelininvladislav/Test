@@ -5,141 +5,92 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Бегущий человек</title>
     <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background: skyblue;
-        }
-        canvas {
-            display: block;
-        }
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
     </style>
 </head>
 <body>
-    <canvas id="canvas"></canvas>
-    <script>
-        const canvas = document.getElementById("canvas");
-        const ctx = canvas.getContext("2d");
+    <script type="module">
+        import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js';
+        import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/loaders/GLTFLoader.js';
+        import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/controls/OrbitControls.js';
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        let scene, camera, renderer, clock, mixer;
+        
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87CEEB); // Голубое небо
 
-        let frame = 0;
-        let groundY = canvas.height - 100;
-        let trees = [{ x: 300 }, { x: 700 }, { x: 1100 }];
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 2, 6);
 
-        class Runner {
-            constructor() {
-                this.x = 200;
-                this.y = groundY - 50;
-                this.speed = 3;
-                this.legAngle = 0;
-                this.armAngle = 0;
-            }
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            document.body.appendChild(renderer.domElement);
 
-            draw() {
-                ctx.fillStyle = "black";
-                ctx.strokeStyle = "black";
-                ctx.lineWidth = 4;
+            clock = new THREE.Clock();
 
-                // Голова
-                ctx.beginPath();
-                ctx.arc(this.x, this.y - 40, 20, 0, Math.PI * 2);
-                ctx.fill();
+            // Добавляем свет
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            scene.add(ambientLight);
 
-                // Борода
-                ctx.fillStyle = "brown";
-                ctx.beginPath();
-                ctx.moveTo(this.x - 10, this.y - 25);
-                ctx.lineTo(this.x, this.y);
-                ctx.lineTo(this.x + 10, this.y - 25);
-                ctx.closePath();
-                ctx.fill();
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(3, 10, 5);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
 
-                ctx.fillStyle = "black";
+            // Поле (трава)
+            const groundGeometry = new THREE.PlaneGeometry(50, 50);
+            const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x228B22 });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
 
-                // Тело
-                ctx.beginPath();
-                ctx.moveTo(this.x - 10, this.y - 20);
-                ctx.lineTo(this.x - 15, this.y + 20);
-                ctx.lineTo(this.x + 15, this.y + 20);
-                ctx.lineTo(this.x + 10, this.y - 20);
-                ctx.closePath();
-                ctx.fill();
+            // Загрузка модели бегущего человека
+            const loader = new GLTFLoader();
+            loader.load('https://modelviewer.dev/shared-assets/models/RobotExpressive.glb', (gltf) => {
+                const model = gltf.scene;
+                model.scale.set(1.2, 1.2, 1.2);
+                model.position.set(0, 0, 0);
+                model.traverse((node) => {
+                    if (node.isMesh) node.castShadow = true;
+                });
 
-                // Руки
-                ctx.save();
-                ctx.translate(this.x - 12, this.y - 10);
-                ctx.rotate(Math.sin(this.armAngle) * 0.8);
-                ctx.fillRect(-5, 0, 10, 30);
-                ctx.restore();
+                scene.add(model);
 
-                ctx.save();
-                ctx.translate(this.x + 12, this.y - 10);
-                ctx.rotate(-Math.sin(this.armAngle) * 0.8);
-                ctx.fillRect(-5, 0, 10, 30);
-                ctx.restore();
-
-                // Ноги
-                ctx.save();
-                ctx.translate(this.x - 5, this.y + 20);
-                ctx.rotate(Math.sin(this.legAngle) * 1.2);
-                ctx.fillRect(-5, 0, 10, 30);
-                ctx.restore();
-
-                ctx.save();
-                ctx.translate(this.x + 5, this.y + 20);
-                ctx.rotate(-Math.sin(this.legAngle) * 1.2);
-                ctx.fillRect(-5, 0, 10, 30);
-                ctx.restore();
-            }
-
-            update() {
-                this.legAngle += 0.15;
-                this.armAngle += 0.15;
-            }
-        }
-
-        const runner = new Runner();
-
-        function drawBackground() {
-            ctx.fillStyle = "green";
-            ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
-
-            ctx.fillStyle = "yellow";
-            ctx.beginPath();
-            ctx.arc(canvas.width - 100, 100, 40, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.fillStyle = "white";
-            for (let i = 0; i < 5; i++) {
-                let x = i * 200 + (frame % 200);
-                ctx.beginPath();
-                ctx.arc(x, 80, 30, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            ctx.fillStyle = "darkgreen";
-            trees.forEach(tree => {
-                tree.x -= 2;
-                if (tree.x < -50) tree.x = canvas.width + Math.random() * 300;
-                ctx.fillRect(tree.x, groundY - 60, 20, 60);
-                ctx.beginPath();
-                ctx.arc(tree.x + 10, groundY - 80, 30, 0, Math.PI * 2);
-                ctx.fill();
+                // Анимация
+                mixer = new THREE.AnimationMixer(model);
+                gltf.animations.forEach((clip) => {
+                    if (clip.name.includes("Run")) {
+                        const action = mixer.clipAction(clip);
+                        action.play();
+                    }
+                });
             });
+
+            // Контроллер камеры
+            const controls = new OrbitControls(camera, renderer.domElement);
+            controls.target.set(0, 1, 0);
+            controls.update();
+
+            animate();
         }
 
         function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawBackground();
-            runner.update();
-            runner.draw();
-            frame++;
             requestAnimationFrame(animate);
+            if (mixer) mixer.update(clock.getDelta());
+            renderer.render(scene, camera);
         }
 
-        animate();
+        window.addEventListener("resize", () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        });
+
+        init();
     </script>
 </body>
 </html>
