@@ -1,105 +1,92 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Анимация</title>
+    <title>Анимация приветствия</title>
     <style>
         body {
-            margin: 0;
-            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f0f0f0;
-            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
         }
-
-        .container {
-            text-align: center;
-        }
-
-        h1 {
-            font-size: 3rem;
-            color: #333;
-            margin-bottom: 20px;
-            animation: fadeIn 2s ease-in-out;
-        }
-
-        .person {
+        .character {
             position: relative;
-            width: 100px;
+            width: 150px;
             height: 200px;
         }
-
         .head {
-            width: 50px;
-            height: 50px;
-            background-color: #333;
+            width: 60px;
+            height: 60px;
+            background-color: #ffcc99;
             border-radius: 50%;
             position: absolute;
-            top: 0;
-            left: 25px;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
         }
-
-        .body {
-            width: 10px;
-            height: 80px;
-            background-color: #333;
+        .eye {
+            width: 8px;
+            height: 8px;
+            background-color: black;
+            border-radius: 50%;
             position: absolute;
-            top: 50px;
-            left: 45px;
+            top: 20px;
         }
-
-        .arm {
-            width: 50px;
-            height: 10px;
-            background-color: #333;
+        .eye.left {
+            left: 15px;
+        }
+        .eye.right {
+            right: 15px;
+        }
+        .body {
+            width: 80px;
+            height: 100px;
+            background-color: #3498db;
             position: absolute;
             top: 60px;
-            left: 0;
-            transform-origin: left center;
-            animation: wave 2s infinite;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 10px;
         }
-
-        .leg {
-            width: 10px;
-            height: 80px;
-            background-color: #333;
+        .hand {
+            width: 15px;
+            height: 50px;
+            background-color: #ffcc99;
             position: absolute;
-            top: 130px;
-            left: 45px;
         }
-
+        .hand.left {
+            left: -20px;
+            top: 20px;
+        }
+        .hand.right {
+            right: -20px;
+            top: 20px;
+            transform-origin: top;
+            animation: wave 1s ease-in-out infinite alternate;
+        }
         @keyframes wave {
-            0%, 100% {
+            0% {
                 transform: rotate(0deg);
             }
-            50% {
-                transform: rotate(-30deg);
-            }
-        }
-
-        @keyframes fadeIn {
-            0% {
-                opacity: 0;
-            }
             100% {
-                opacity: 1;
+                transform: rotate(30deg);
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Привет!</h1>
-        <div class="person">
-            <div class="head"></div>
-            <div class="body"></div>
-            <div class="arm"></div>
-            <div class="leg"></div>
+    <div class="character">
+        <div class="head">
+            <div class="eye left"></div>
+            <div class="eye right"></div>
         </div>
+        <div class="body"></div>
+        <div class="hand left"></div>
+        <div class="hand right"></div>
     </div>
 </body>
 </html>
