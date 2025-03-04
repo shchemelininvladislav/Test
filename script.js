@@ -1,22 +1,24 @@
-// Элементы управления
-const startStopBtn = document.getElementById('startStopBtn');
-const speedControl = document.getElementById('speedControl');
-const runner = document.querySelector('.runner');
+const runner = document.querySelector(".runner");
+const speedControl = document.getElementById("speedControl");
+const toggleRun = document.getElementById("toggleRun");
 
-let isRunning = true;
+let running = true;
+let speed = 5;
 
-// Управление стартом/стопом
-startStopBtn.addEventListener('click', () => {
-  isRunning = !isRunning;
-  if (isRunning) {
-    runner.style.animationPlayState = 'running';
-  } else {
-    runner.style.animationPlayState = 'paused';
-  }
-});
+function updateSpeed() {
+    speed = speedControl.value;
+    runner.style.animationDuration = `${1 / speed}s`;
+}
 
-// Управление скоростью
-speedControl.addEventListener('input', (e) => {
-  const speed = e.target.value;
-  runner.style.animationDuration = `${1 / speed}s`;
-});
+function toggleRunning() {
+    if (running) {
+        runner.style.animationPlayState = "paused";
+    } else {
+        runner.style.animationPlayState = "running";
+    }
+    running = !running;
+}
+
+speedControl.addEventListener("input", updateSpeed);
+toggleRun.addEventListener("click", toggleRunning);
+updateSpeed();

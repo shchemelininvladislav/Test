@@ -1,24 +1,31 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Бег по полю</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Бегущий человек</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="sky"></div>
-  <div class="field">
-    <div class="cloud cloud-1"></div>
-    <div class="cloud cloud-2"></div>
-    <div class="tree tree-1"></div>
-    <div class="tree tree-2"></div>
-    <div class="runner"></div>
-  </div>
-  <div class="controls">
-    <button id="startStopBtn">Старт/Стоп</button>
-    <input type="range" id="speedControl" min="1" max="10" value="5">
-  </div>
-  <script src="script.js"></script>
+    <div class="scene">
+        <div class="sky">
+            <div class="cloud"></div>
+            <div class="cloud small"></div>
+        </div>
+        <div class="field">
+            <div class="runner">
+                <div class="body"></div>
+                <div class="leg left"></div>
+                <div class="leg right"></div>
+                <div class="arm left"></div>
+                <div class="arm right"></div>
+            </div>
+        </div>
+    </div>
+    <div class="controls">
+        <button id="toggleRun">Старт/Стоп</button>
+        <label>Скорость: <input type="range" id="speedControl" min="1" max="10" value="5"></label>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>

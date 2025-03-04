@@ -1,108 +1,120 @@
-/* Общие стили */
-body, html {
+body {
     margin: 0;
-    padding: 0;
     overflow: hidden;
-    height: 100%;
-  }
-  
-  /* Небо */
-  .sky {
+    background: linear-gradient(to top, #4caf50, #87ceeb);
+    font-family: Arial, sans-serif;
+}
+
+.scene {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}
+
+.sky {
     position: absolute;
     top: 0;
-    left: 0;
     width: 100%;
-    height: 50%;
-    background: linear-gradient(to bottom, #87CEEB, #B0E2FF);
-  }
-  
-  /* Поле */
-  .field {
+    height: 50vh;
+    background: linear-gradient(to bottom, #87ceeb, #ffffff);
+}
+
+.cloud {
     position: absolute;
-    top: 50%;
-    left: 0;
-    width: 100%;
-    height: 50%;
-    background: linear-gradient(to bottom, #32CD32, #228B22);
-  }
-  
-  /* Облака */
-  .cloud {
-    position: absolute;
-    background: white;
-    border-radius: 50%;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
-    animation: moveClouds 20s linear infinite;
-  }
-  
-  .cloud-1 {
-    top: 10%;
-    left: 10%;
-    width: 100px;
+    width: 120px;
     height: 60px;
-  }
-  
-  .cloud-2 {
+    background: white;
+    border-radius: 60px;
     top: 20%;
-    left: 50%;
-    width: 150px;
-    height: 80px;
+    left: -150px;
+    animation: moveClouds 20s linear infinite;
+}
+
+.cloud.small {
+    width: 80px;
+    height: 40px;
+    top: 30%;
     animation-duration: 25s;
-  }
-  
-  /* Деревья */
-  .tree {
+}
+
+@keyframes moveClouds {
+    from { left: -150px; }
+    to { left: 110vw; }
+}
+
+.field {
     position: absolute;
     bottom: 0;
-    width: 50px;
-    height: 100px;
-    background: #8B4513;
-    clip-path: polygon(0% 100%, 100% 100%, 80% 0%, 20% 0%);
-  }
-  
-  .tree-1 {
-    left: 20%;
-  }
-  
-  .tree-2 {
-    left: 70%;
-  }
-  
-  /* Бегущий человек */
-  .runner {
+    width: 100%;
+    height: 50vh;
+    background: linear-gradient(to top, #228B22, #32CD32);
+}
+
+.runner {
     position: absolute;
-    bottom: 10%;
+    bottom: 20px;
     left: 10%;
     width: 50px;
-    height: 100px;
-    background: #000;
-    clip-path: polygon(0% 100%, 100% 100%, 80% 0%, 20% 0%);
-    animation: run 0.8s steps(8) infinite;
-  }
-  
-  /* Анимация бега */
-  @keyframes run {
-    0% { background-position: 0 0; }
-    100% { background-position: -400px 0; }
-  }
-  
-  /* Анимация облаков */
-  @keyframes moveClouds {
-    0% { transform: translateX(100%); }
-    100% { transform: translateX(-100%); }
-  }
-  
-  /* Управление */
-  .controls {
+    height: 80px;
+    animation: run 0.5s steps(2) infinite;
+}
+
+.body {
+    width: 20px;
+    height: 40px;
+    background: black;
     position: absolute;
+    left: 15px;
+    top: 20px;
+}
+
+.leg, .arm {
+    width: 10px;
+    height: 30px;
+    background: black;
+    position: absolute;
+    top: 50px;
+    animation: moveLimb 0.5s alternate infinite;
+}
+
+.leg.left {
+    left: 5px;
+}
+
+.leg.right {
+    right: 5px;
+}
+
+.arm.left {
+    left: 5px;
+    top: 30px;
+}
+
+.arm.right {
+    right: 5px;
+    top: 30px;
+}
+
+@keyframes moveLimb {
+    from { transform: rotate(30deg); }
+    to { transform: rotate(-30deg); }
+}
+
+@keyframes run {
+    from { left: 10%; }
+    to { left: 100%; }
+}
+
+.controls {
+    position: fixed;
     bottom: 10px;
     left: 50%;
     transform: translateX(-50%);
-    display: flex;
-    gap: 10px;
-  }
-  
-  button, input {
+    background: rgba(255, 255, 255, 0.8);
     padding: 10px;
-    font-size: 16px;
-  }
+    border-radius: 10px;
+}
+
+button, input {
+    margin: 5px;
+}
