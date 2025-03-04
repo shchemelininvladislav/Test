@@ -1,172 +1,187 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Бегущий человек с анимацией</title>
     <style>
-        body, html {
+        body {
             margin: 0;
-            padding: 0;
             overflow: hidden;
-            height: 100%;
-            background: linear-gradient(to bottom, #87CEEB, #FFFFFF);
+            background: #87CEEB;
         }
 
-        #scene {
+        .scene {
+            width: 100vw;
+            height: 100vh;
             position: relative;
-            width: 100%;
-            height: 100%;
         }
 
-        /* Бегущий человек */
-        .runner {
-            position: absolute;
-            bottom: 10%;
-            left: 20%;
-            width: 50px;
-            height: 150px;
-        }
-
-        .body {
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 30px;
-            height: 100px;
-            background: #333;
-            border-radius: 15px;
-        }
-
-        .leg {
-            position: absolute;
-            bottom: -10px;
-            width: 10px;
-            height: 60px;
-            background: #333;
-            border-radius: 5px;
-        }
-
-        .leg.left {
-            left: 5px;
-            transform-origin: top;
-        }
-
-        .leg.right {
-            right: 5px;
-            transform-origin: top;
-        }
-
-        .arm {
+        /* Фоновые элементы */
+        .sun {
+            width: 80px;
+            height: 80px;
+            background: #FFD700;
+            border-radius: 50%;
             position: absolute;
             top: 20px;
-            width: 10px;
-            height: 50px;
-            background: #333;
-            border-radius: 5px;
+            right: 20px;
         }
 
-        .arm.left {
-            left: -10px;
-            transform-origin: bottom;
-        }
-
-        .arm.right {
-            right: -10px;
-            transform-origin: bottom;
-        }
-
-        /* Фон */
         .cloud {
-            position: absolute;
-            top: 10%;
-            width: 100px;
-            height: 50px;
+            width: 120px;
+            height: 40px;
             background: white;
-            border-radius: 50px;
-            animation: moveCloud 20s linear infinite;
+            border-radius: 20px;
+            position: absolute;
+            animation: cloudMove 20s linear infinite;
         }
 
         .tree {
             position: absolute;
-            bottom: 10%;
-            width: 30px;
+            bottom: 100px;
+            width: 40px;
             height: 100px;
-            background: #8B4513;
+            background: #2E8B57;
+            clip-path: polygon(0 100%, 100% 100%, 90% 0, 10% 0);
+            animation: treeMove 8s linear infinite;
+        }
+
+        /* Персонаж */
+        .runner {
+            position: absolute;
+            bottom: 100px;
+            left: 30%;
+            transform-origin: bottom;
+        }
+
+        .head {
+            width: 40px;
+            height: 40px;
+            background: #FFD8A8;
+            border-radius: 50%;
+            position: absolute;
+            z-index: 2;
+        }
+
+        .beard {
+            width: 30px;
+            height: 20px;
+            background: #333;
+            position: absolute;
+            bottom: -5px;
+            left: 5px;
+            border-radius: 0 0 15px 15px;
+        }
+
+        .body {
+            width: 30px;
+            height: 60px;
+            background: #1E90FF;
+            position: absolute;
+            top: 35px;
+            left: 5px;
             border-radius: 10px;
         }
 
-        .leaf {
+        .limb {
+            background: #FFD8A8;
             position: absolute;
-            bottom: 100px;
-            width: 50px;
+            transform-origin: top;
+        }
+
+        .arm {
+            width: 8px;
+            height: 40px;
+        }
+
+        .leg {
+            width: 10px;
             height: 50px;
-            background: green;
-            border-radius: 50%;
-            animation: sway 2s infinite alternate;
         }
 
-        @keyframes sway {
-            0% { transform: rotate(-10deg); }
-            100% { transform: rotate(10deg); }
+        /* Анимации */
+        @keyframes run {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(-5deg); }
         }
 
-        @keyframes moveCloud {
-            0% { left: -100px; }
-            100% { left: 100%; }
+        @keyframes cloudMove {
+            from { left: -150px; }
+            to { left: 100%; }
+        }
+
+        @keyframes treeMove {
+            from { right: -50px; }
+            to { right: 100%; }
         }
     </style>
 </head>
 <body>
-    <div id="scene">
-        <!-- Бегущий человек -->
+    <div class="scene">
+        <div class="sun"></div>
+        <div class="cloud" style="top: 50px; animation-duration: 25s;"></div>
+        <div class="cloud" style="top: 150px; animation-duration: 30s;"></div>
+        
         <div class="runner">
+            <!-- Голова -->
+            <div class="head">
+                <div class="beard"></div>
+            </div>
+            
+            <!-- Тело -->
             <div class="body"></div>
-            <div class="leg left"></div>
-            <div class="leg right"></div>
-            <div class="arm left"></div>
-            <div class="arm right"></div>
+            
+            <!-- Руки -->
+            <div class="limb arm left-arm" style="left: -5px; top: 40px; transform: rotate(45deg);"></div>
+            <div class="limb arm right-arm" style="right: -5px; top: 40px; transform: rotate(-45deg);"></div>
+            
+            <!-- Ноги -->
+            <div class="limb leg left-leg" style="left: 5px; top: 90px; transform: rotate(-20deg);"></div>
+            <div class="limb leg right-leg" style="right: 5px; top: 90px; transform: rotate(20deg);"></div>
         </div>
-
-        <!-- Фон -->
-        <div class="cloud" style="top: 20%; left: 10%;"></div>
-        <div class="cloud" style="top: 15%; left: 40%;"></div>
-        <div class="tree" style="left: 50%;"></div>
-        <div class="leaf" style="left: 50%;"></div>
+        
+        <!-- Поле -->
+        <div style="position: absolute; bottom: 0; width: 100%; height: 100px; background: #7CFC00;"></div>
     </div>
 
     <script>
-        // Анимация бегущего человека
         const runner = document.querySelector('.runner');
-        const leftLeg = document.querySelector('.leg.left');
-        const rightLeg = document.querySelector('.leg.right');
-        const leftArm = document.querySelector('.arm.left');
-        const rightArm = document.querySelector('.arm.right');
+        const leftArm = document.querySelector('.left-arm');
+        const rightArm = document.querySelector('.right-arm');
+        const leftLeg = document.querySelector('.left-leg');
+        const rightLeg = document.querySelector('.right-leg');
 
         let angle = 0;
-
-        function animateRunner() {
-            angle += 10;
-            const legRotation = Math.sin(angle * Math.PI / 180) * 30; // Движение ног
-            const armRotation = Math.cos(angle * Math.PI / 180) * 30; // Движение рук
-
-            leftLeg.style.transform = `rotate(${legRotation}deg)`;
-            rightLeg.style.transform = `rotate(${-legRotation}deg)`;
-            leftArm.style.transform = `rotate(${-armRotation}deg)`;
-            rightArm.style.transform = `rotate(${armRotation}deg)`;
-
-            requestAnimationFrame(animateRunner);
+        
+        function animate() {
+            angle = (angle + 5) % 360;
+            
+            // Анимация рук
+            leftArm.style.transform = `rotate(${45 + Math.sin(angle * Math.PI / 180) * 30}deg)`;
+            rightArm.style.transform = `rotate(${-45 + Math.sin(angle * Math.PI / 180 + Math.PI) * 30}deg)`;
+            
+            // Анимация ног
+            leftLeg.style.transform = `rotate(${-20 + Math.sin(angle * Math.PI / 180 + Math.PI) * 30}deg)`;
+            rightLeg.style.transform = `rotate(${20 + Math.sin(angle * Math.PI / 180) * 30}deg)`;
+            
+            // Анимация всего тела
+            runner.style.transform = `translateY(${Math.sin(angle * Math.PI / 90) * 10}px)`;
+            
+            requestAnimationFrame(animate);
         }
 
-        animateRunner();
+        // Создание деревьев
+        function createTrees() {
+            const scene = document.querySelector('.scene');
+            for(let i = 0; i < 8; i++) {
+                const tree = document.createElement('div');
+                tree.className = 'tree';
+                tree.style.right = `${Math.random() * 100}%`;
+                tree.style.animationDelay = `${Math.random() * -8}s`;
+                scene.appendChild(tree);
+            }
+        }
 
-        // Анимация облаков
-        const clouds = document.querySelectorAll('.cloud');
-        clouds.forEach(cloud => {
-            const speed = Math.random() * 10 + 5; // Случайная скорость облаков
-            cloud.style.animationDuration = `${speed}s`;
-        });
+        createTrees();
+        animate();
     </script>
 </body>
-</html> 
+</html>
