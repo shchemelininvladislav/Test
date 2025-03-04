@@ -1,222 +1,172 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Игры в одном файле</title>
+    <title>Бегущий человек с анимацией</title>
     <style>
-        * {
+        body, html {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            overflow: hidden;
+            height: 100%;
+            background: linear-gradient(to bottom, #87CEEB, #FFFFFF);
         }
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f4f8;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+
+        #scene {
+            position: relative;
+            width: 100%;
+            height: 100%;
         }
-        header {
-            margin-bottom: 20px;
+
+        /* Бегущий человек */
+        .runner {
+            position: absolute;
+            bottom: 10%;
+            left: 20%;
+            width: 50px;
+            height: 150px;
         }
-        nav button {
-            padding: 10px 20px;
-            margin: 5px;
-            cursor: pointer;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            transition: background-color 0.3s;
+
+        .body {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 100px;
+            background: #333;
+            border-radius: 15px;
         }
-        nav button:hover {
-            background-color: #45a049;
+
+        .leg {
+            position: absolute;
+            bottom: -10px;
+            width: 10px;
+            height: 60px;
+            background: #333;
+            border-radius: 5px;
         }
-        .game-container {
-            display: none;
-            text-align: center;
+
+        .leg.left {
+            left: 5px;
+            transform-origin: top;
         }
-        .tic-tac-toe, .minesweeper, .puzzle {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
+
+        .leg.right {
+            right: 5px;
+            transform-origin: top;
         }
-        .tic-tac-toe button, .minesweeper button {
+
+        .arm {
+            position: absolute;
+            top: 20px;
+            width: 10px;
+            height: 50px;
+            background: #333;
+            border-radius: 5px;
+        }
+
+        .arm.left {
+            left: -10px;
+            transform-origin: bottom;
+        }
+
+        .arm.right {
+            right: -10px;
+            transform-origin: bottom;
+        }
+
+        /* Фон */
+        .cloud {
+            position: absolute;
+            top: 10%;
+            width: 100px;
+            height: 50px;
+            background: white;
+            border-radius: 50px;
+            animation: moveCloud 20s linear infinite;
+        }
+
+        .tree {
+            position: absolute;
+            bottom: 10%;
+            width: 30px;
+            height: 100px;
+            background: #8B4513;
+            border-radius: 10px;
+        }
+
+        .leaf {
+            position: absolute;
+            bottom: 100px;
             width: 50px;
             height: 50px;
-            font-size: 1.5em;
-            cursor: pointer;
+            background: green;
+            border-radius: 50%;
+            animation: sway 2s infinite alternate;
         }
-        .puzzle img {
-            width: 100px;
-            height: 100px;
-            margin: 5px;
+
+        @keyframes sway {
+            0% { transform: rotate(-10deg); }
+            100% { transform: rotate(10deg); }
         }
-        .puzzle-container {
-            display: grid;
-            grid-template-columns: repeat(3, 100px);
-            gap: 5px;
+
+        @keyframes moveCloud {
+            0% { left: -100px; }
+            100% { left: 100%; }
         }
     </style>
 </head>
 <body>
+    <div id="scene">
+        <!-- Бегущий человек -->
+        <div class="runner">
+            <div class="body"></div>
+            <div class="leg left"></div>
+            <div class="leg right"></div>
+            <div class="arm left"></div>
+            <div class="arm right"></div>
+        </div>
 
-    <header>
-        <h1>Игры в одном файле</h1>
-        <nav>
-            <button onclick="showGame('ticTacToe')">Тик-Так-Тое</button>
-            <button onclick="showGame('minesweeper')">Сапер</button>
-            <button onclick="showGame('puzzle')">Головоломка</button>
-        </nav>
-    </header>
-
-    <div id="ticTacToe" class="game-container tic-tac-toe">
-        <h2>Тик-Так-Тое</h2>
-        <div id="ticTacToeBoard"></div>
-        <button onclick="startTicTacToe()">Новая игра</button>
-    </div>
-
-    <div id="minesweeper" class="game-container minesweeper">
-        <h2>Сапер</h2>
-        <div id="minesweeperBoard"></div>
-        <button onclick="startMinesweeper()">Новая игра</button>
-    </div>
-
-    <div id="puzzle" class="game-container puzzle">
-        <h2>Головоломка</h2>
-        <div id="puzzleBoard" class="puzzle-container"></div>
-        <button onclick="startPuzzle()">Новая игра</button>
+        <!-- Фон -->
+        <div class="cloud" style="top: 20%; left: 10%;"></div>
+        <div class="cloud" style="top: 15%; left: 40%;"></div>
+        <div class="tree" style="left: 50%;"></div>
+        <div class="leaf" style="left: 50%;"></div>
     </div>
 
     <script>
-        // Тик-Так-Тое (Tic-Tac-Toe)
-        function startTicTacToe() {
-            let board = ['','','','','','','','',''];
-            let turn = 'X';
-            const ticTacToeBoard = document.getElementById('ticTacToeBoard');
-            ticTacToeBoard.innerHTML = '';
-            board.forEach((cell, index) => {
-                let button = document.createElement('button');
-                button.innerText = cell;
-                button.onclick = () => makeMove(index);
-                ticTacToeBoard.appendChild(button);
-            });
+        // Анимация бегущего человека
+        const runner = document.querySelector('.runner');
+        const leftLeg = document.querySelector('.leg.left');
+        const rightLeg = document.querySelector('.leg.right');
+        const leftArm = document.querySelector('.arm.left');
+        const rightArm = document.querySelector('.arm.right');
 
-            function makeMove(index) {
-                if (board[index] === '') {
-                    board[index] = turn;
-                    turn = turn === 'X' ? 'O' : 'X';
-                    renderBoard();
-                    if (checkWinner(board)) {
-                        alert(`${checkWinner(board)} победил!`);
-                    }
-                }
-            }
+        let angle = 0;
 
-            function renderBoard() {
-                Array.from(ticTacToeBoard.children).forEach((button, index) => {
-                    button.innerText = board[index];
-                });
-            }
+        function animateRunner() {
+            angle += 10;
+            const legRotation = Math.sin(angle * Math.PI / 180) * 30; // Движение ног
+            const armRotation = Math.cos(angle * Math.PI / 180) * 30; // Движение рук
 
-            function checkWinner(board) {
-                const winningCombinations = [
-                    [0, 1, 2], [3, 4, 5], [6, 7, 8], // горизонтали
-                    [0, 3, 6], [1, 4, 7], [2, 5, 8], // вертикали
-                    [0, 4, 8], [2, 4, 6]             // диагонали
-                ];
-                for (const [a, b, c] of winningCombinations) {
-                    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-                        return board[a];
-                    }
-                }
-                return null;
-            }
+            leftLeg.style.transform = `rotate(${legRotation}deg)`;
+            rightLeg.style.transform = `rotate(${-legRotation}deg)`;
+            leftArm.style.transform = `rotate(${-armRotation}deg)`;
+            rightArm.style.transform = `rotate(${armRotation}deg)`;
+
+            requestAnimationFrame(animateRunner);
         }
 
-        // Сапер (Minesweeper)
-        function startMinesweeper() {
-            const rows = 5;
-            const cols = 5;
-            const mines = 5;
-            let board = Array.from({ length: rows }, () => Array(cols).fill(0));
+        animateRunner();
 
-            // Randomly place mines
-            let minesPlaced = 0;
-            while (minesPlaced < mines) {
-                let randRow = Math.floor(Math.random() * rows);
-                let randCol = Math.floor(Math.random() * cols);
-                if (board[randRow][randCol] !== 'X') {
-                    board[randRow][randCol] = 'X';
-                    minesPlaced++;
-                }
-            }
-
-            // Calculate numbers around mines
-            for (let row = 0; row < rows; row++) {
-                for (let col = 0; col < cols; col++) {
-                    if (board[row][col] === 'X') continue;
-                    let mineCount = 0;
-                    for (let i = -1; i <= 1; i++) {
-                        for (let j = -1; j <= 1; j++) {
-                            let r = row + i, c = col + j;
-                            if (r >= 0 && r < rows && c >= 0 && c < cols && board[r][c] === 'X') {
-                                mineCount++;
-                            }
-                        }
-                    }
-                    board[row][col] = mineCount;
-                }
-            }
-
-            const minesweeperBoard = document.getElementById('minesweeperBoard');
-            minesweeperBoard.innerHTML = '';
-            board.forEach((row, rowIndex) => {
-                row.forEach((cell, colIndex) => {
-                    let button = document.createElement('button');
-                    button.innerText = '';
-                    button.onclick = () => revealCell(rowIndex, colIndex);
-                    minesweeperBoard.appendChild(button);
-                });
-            });
-
-            function revealCell(row, col) {
-                const index = row * cols + col;
-                const button = minesweeperBoard.children[index];
-                if (board[row][col] === 'X') {
-                    button.innerText = '💣';
-                    alert('Вы проиграли!');
-                } else {
-                    button.innerText = board[row][col] === 0 ? '' : board[row][col];
-                }
-            }
-        }
-
-        // Головоломка (Puzzle)
-        function startPuzzle() {
-            const images = ['1.jpg', '2.jpg', '3.jpg', '4.jpg', '5.jpg', '6.jpg', '7.jpg', '8.jpg'];
-            let shuffled = images.sort(() => Math.random() - 0.5);
-            const puzzleBoard = document.getElementById('puzzleBoard');
-            puzzleBoard.innerHTML = '';
-            shuffled.forEach(image => {
-                let img = document.createElement('img');
-                img.src = `https://via.placeholder.com/100x100?text=${image}`;
-                puzzleBoard.appendChild(img);
-            });
-        }
-
-        // Переключение между играми
-        function showGame(gameId) {
-            document.querySelectorAll('.game-container').forEach(game => {
-                game.style.display = 'none';
-            });
-            document.getElementById(gameId).style.display = 'block';
-        }
+        // Анимация облаков
+        const clouds = document.querySelectorAll('.cloud');
+        clouds.forEach(cloud => {
+            const speed = Math.random() * 10 + 5; // Случайная скорость облаков
+            cloud.style.animationDuration = `${speed}s`;
+        });
     </script>
-
 </body>
-</html>
+</html> 
