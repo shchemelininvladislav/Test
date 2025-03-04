@@ -1,228 +1,56 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Бегущий человек</title>
   <style>
-    body, html {
+    body {
       margin: 0;
-      padding: 0;
       overflow: hidden;
-      height: 100%;
-      background: linear-gradient(180deg, #87CEEB, #E0F6FF);
+      background: linear-gradient(180deg, #87CEEB, #FFF);
     }
-
-    .scene {
-      position: relative;
-      width: 100%;
-      height: 100%;
-    }
-
-    .runner {
-      position: absolute;
-      bottom: 10%;
-      left: 20%;
-      width: 100px;
-      height: 200px;
-      transform-origin: bottom;
-    }
-
-    .leg, .arm {
-      position: absolute;
-      background: #333;
-      width: 10px;
-      height: 60px;
-      transform-origin: top;
-    }
-
-    .leg-left {
-      left: 30px;
-      top: 100px;
-      transform: rotate(20deg);
-    }
-
-    .leg-right {
-      left: 60px;
-      top: 100px;
-      transform: rotate(-20deg);
-    }
-
-    .arm-left {
-      left: 20px;
-      top: 50px;
-      transform: rotate(-30deg);
-    }
-
-    .arm-right {
-      left: 70px;
-      top: 50px;
-      transform: rotate(30deg);
-    }
-
-    .body {
-      position: absolute;
-      background: #555;
-      width: 20px;
-      height: 80px;
-      left: 40px;
-      top: 70px;
-    }
-
-    .head {
-      position: absolute;
-      background: #777;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      left: 35px;
-      top: 30px;
-    }
-
-    .ground {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      height: 10%;
-      background: #4CAF50;
-    }
-
-    .tree {
-      position: absolute;
-      bottom: 10%;
-      width: 20px;
-      height: 100px;
-      background: #8B4513;
-    }
-
-    .tree::before {
-      content: '';
-      position: absolute;
-      top: -50px;
-      left: -30px;
-      width: 80px;
-      height: 80px;
-      background: #228B22;
-      border-radius: 50%;
-    }
-
-    .tree1 {
-      left: 10%;
-    }
-
-    .tree2 {
-      left: 40%;
-    }
-
-    .tree3 {
-      left: 70%;
-    }
-
-    .sun {
-      position: absolute;
-      top: 10%;
-      left: 80%;
-      width: 50px;
-      height: 50px;
-      background: #FFD700;
-      border-radius: 50%;
-      box-shadow: 0 0 50px #FFD700;
-    }
-
-    @keyframes run {
-      0%, 100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-10px);
-      }
-    }
-
-    @keyframes legSwingLeft {
-      0%, 100% {
-        transform: rotate(20deg);
-      }
-      50% {
-        transform: rotate(-20deg);
-      }
-    }
-
-    @keyframes legSwingRight {
-      0%, 100% {
-        transform: rotate(-20deg);
-      }
-      50% {
-        transform: rotate(20deg);
-      }
-    }
-
-    @keyframes armSwingLeft {
-      0%, 100% {
-        transform: rotate(-30deg);
-      }
-      50% {
-        transform: rotate(30deg);
-      }
-    }
-
-    @keyframes armSwingRight {
-      0%, 100% {
-        transform: rotate(30deg);
-      }
-      50% {
-        transform: rotate(-30deg);
-      }
-    }
-
-    @keyframes moveBackground {
-      0% {
-        transform: translateX(0);
-      }
-      100% {
-        transform: translateX(-100%);
-      }
-    }
-
-    .runner {
-      animation: run 0.5s infinite ease-in-out;
-    }
-
-    .leg-left {
-      animation: legSwingLeft 0.5s infinite ease-in-out;
-    }
-
-    .leg-right {
-      animation: legSwingRight 0.5s infinite ease-in-out;
-    }
-
-    .arm-left {
-      animation: armSwingLeft 0.5s infinite ease-in-out;
-    }
-
-    .arm-right {
-      animation: armSwingRight 0.5s infinite ease-in-out;
-    }
-
-    .tree1, .tree2, .tree3 {
-      animation: moveBackground 10s infinite linear;
+    canvas {
+      display: block;
     }
   </style>
 </head>
 <body>
-  <div class="scene">
-    <div class="runner">
-      <div class="head"></div>
-      <div class="body"></div>
-      <div class="leg leg-left"></div>
-      <div class="leg leg-right"></div>
-      <div class="arm arm-left"></div>
-      <div class="arm arm-right"></div>
-    </div>
-    <div class="ground"></div>
-    <div class="tree tree1"></div>
-    <div class="tree tree2"></div>
-    <div class="tree tree3"></div>
-    <div class="sun"></div>
-  </div>
+  <canvas id="gameCanvas"></canvas>
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    let frame = 0;
+    const runner = {
+      x: 100,
+      y: canvas.height - 150,
+      width: 50,
+      height: 100,
+      speed: 5,
+    };
+
+    function drawRunner() {
+      ctx.fillStyle = "red";
+      ctx.fillRect(runner.x, runner.y, runner.width, runner.height);
+    }
+
+    function drawBackground() {
+      ctx.fillStyle = "green";
+      ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+    }
+
+    function update() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawBackground();
+      drawRunner();
+      frame++;
+      requestAnimationFrame(update);
+    }
+
+    update();
+  </script>
 </body>
 </html>
