@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренировки</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .result-item {
+            background: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Дневник тренировок</h1>
+        
+        <form id="workoutForm">
+            <label for="date">Дата:</label>
+            <input type="date" id="date" required>
+            
+            <label for="exercise">Упражнение:</label>
+            <input type="text" id="exercise" placeholder="Введите упражнение" required>
+            
+            <label for="duration">Длительность (мин):</label>
+            <input type="number" id="duration" placeholder="Введите длительность" required>
+            
+            <label for="intensity">Интенсивность:</label>
+            <select id="intensity" required>
+                <option value="low">Низкая</option>
+                <option value="medium">Средняя</option>
+                <option value="high">Высокая</option>
+            </select>
+            
+            <label for="notes">Заметки:</label>
+            <textarea id="notes" placeholder="Дополнительные заметки"></textarea>
+            
+            <button type="submit">Сохранить тренировку</button>
+        </form>
+        
+        <div class="results" id="results">
+            <h2>Сохраненные тренировки</h2>
+        </div>
+    </div>
+
+    <script>
+        const workoutForm = document.getElementById('workoutForm');
+        const resultsDiv = document.getElementById('results');
+
+        workoutForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const date = document.getElementById('date').value;
+            const exercise = document.getElementById('exercise').value;
+            const duration = document.getElementById('duration').value;
+            const intensity = document.getElementById('intensity').value;
+            const notes = document.getElementById('notes').value;
+
+            const workout = {
+                date,
+                exercise,
+                duration,
+                intensity,
+                notes
+            };
+
+            saveWorkout(workout);
+            displayWorkouts();
+            workoutForm.reset();
+        });
+
+        function saveWorkout(workout) {
+            let workouts = JSON.parse(localStorage.getItem('workouts')) || [];
+            workouts.push(workout);
+            localStorage.setItem('workouts', JSON.stringify(workouts));
+        }
+
+        function displayWorkouts() {
+            let workouts = JSON.parse(localStorage.getItem('workouts')) || [];
+            resultsDiv.innerHTML = '<h2>Сохраненные тренировки</h2>';
+
+            if (workouts.length === 0) {
+                resultsDiv.innerHTML += '<p>Нет сохраненных тренировок.</p>';
+            } else {
+                workouts.forEach((workout, index) => {
+                    const workoutItem = document.createElement('div');
+                    workoutItem.className = 'result-item';
+                    workoutItem.innerHTML = `
+                        <p><strong>Дата:</strong> ${workout.date}</p>
+                        <p><strong>Упражнение:</strong> ${workout.exercise}</p>
+                        <p><strong>Длительность:</strong> ${workout.duration} мин</p>
+                        <p><strong>Интенсивность:</strong> ${workout.intensity}</p>
+                        <p><strong>Заметки:</strong> ${workout.notes}</p>
+                        <button onclick="deleteWorkout(${index})">Удалить</button>
+                    `;
+                    resultsDiv.appendChild(workoutItem);
+                });
+            }
+        }
+
+        function deleteWorkout(index) {
+            let workouts = JSON.parse(localStorage.getItem('workouts'));
+            workouts.splice(index, 1);
+            localStorage.setItem('workouts', JSON.stringify(workouts));
+            displayWorkouts();
+        }
+
+        // Отображаем сохраненные тренировки при загрузке страницы
+        displayWorkouts();
+    </script>
+
+</body>
+</html>
