@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тренировки</title>
+    <title>Дневник тренировок</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -16,7 +16,7 @@
             color: #333;
         }
         .container {
-            max-width: 600px;
+            max-width: 800px;
             margin: 0 auto;
             background: #fff;
             padding: 20px;
@@ -36,7 +36,6 @@
             border-radius: 4px;
         }
         button {
-            width: 100%;
             padding: 10px;
             background-color: #28a745;
             color: #fff;
@@ -57,6 +56,31 @@
             border-radius: 4px;
             margin-bottom: 10px;
         }
+        .filters {
+            margin-bottom: 20px;
+        }
+        .statistics {
+            margin-top: 20px;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 4px;
+        }
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .calendar-day {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .calendar-day.has-workout {
+            background-color: #28a745;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -64,6 +88,7 @@
     <div class="container">
         <h1>Дневник тренировок</h1>
         
+        <!-- Форма для добавления тренировки -->
         <form id="workoutForm">
             <label for="date">Дата:</label>
             <input type="date" id="date" required>
@@ -86,52 +111,91 @@
             
             <button type="submit">Сохранить тренировку</button>
         </form>
-        
+
+        <!-- Фильтры и сортировка -->
+        <div class="filters">
+            <label for="filterDate">Фильтр по дате:</label>
+            <input type="date" id="filterDate">
+            
+            <label for="filterExercise">Фильтр по упражнению:</label>
+            <input type="text" id="filterExercise" placeholder="Введите упражнение">
+            
+            <label for="filterIntensity">Фильтр по интенсивности:</label>
+            <select id="filterIntensity">
+                <option value="">Все</option>
+                <option value="low">Низкая</option>
+                <option value="medium">Средняя</option>
+                <option value="high">Высокая</option>
+            </select>
+            
+            <button onclick="applyFilters()">Применить фильтры</button>
+            <button onclick="clearFilters()">Сбросить фильтры</button>
+        </div>
+
+        <!-- Статистика -->
+        <div class="statistics">
+            <h2>Статистика</h2>
+            <p><strong>Общее количество тренировок:</strong> <span id="totalWorkouts">0</span></p>
+            <p><strong>Общее время тренировок:</strong> <span id="totalDuration">0</span> мин</p>
+        </div>
+
+        <!-- Календарь тренировок -->
+        <div class="calendar" id="calendar"></div>
+
+        <!-- Список тренировок -->
         <div class="results" id="results">
             <h2>Сохраненные тренировки</h2>
         </div>
+
+        <!-- Кнопка экспорта -->
+        <button onclick="exportData()">Экспорт данных (JSON)</button>
     </div>
 
     <script>
         const workoutForm = document.getElementById('workoutForm');
         const resultsDiv = document.getElementById('results');
+        const calendarDiv = document.getElementById('calendar');
+        const totalWorkoutsSpan = document.getElementById('totalWorkouts');
+        const totalDurationSpan = document.getElementById('totalDuration');
 
+        // Загрузка данных при старте
+        let workouts = JSON.parse(localStorage.getItem('workouts')) || [];
+        displayWorkouts();
+        updateStatistics();
+        renderCalendar();
+
+        // Добавление тренировки
         workoutForm.addEventListener('submit', function(event) {
             event.preventDefault();
 
             const date = document.getElementById('date').value;
             const exercise = document.getElementById('exercise').value;
-            const duration = document.getElementById('duration').value;
+            const duration = parseInt(document.getElementById('duration').value);
             const intensity = document.getElementById('intensity').value;
             const notes = document.getElementById('notes').value;
 
-            const workout = {
-                date,
-                exercise,
-                duration,
-                intensity,
-                notes
-            };
-
-            saveWorkout(workout);
+            const workout = { date, exercise, duration, intensity, notes };
+            workouts.push(workout);
+            saveWorkouts();
             displayWorkouts();
+            updateStatistics();
+            renderCalendar();
             workoutForm.reset();
         });
 
-        function saveWorkout(workout) {
-            let workouts = JSON.parse(localStorage.getItem('workouts')) || [];
-            workouts.push(workout);
+        // Сохранение тренировок в localStorage
+        function saveWorkouts() {
             localStorage.setItem('workouts', JSON.stringify(workouts));
         }
 
-        function displayWorkouts() {
-            let workouts = JSON.parse(localStorage.getItem('workouts')) || [];
+        // Отображение тренировок
+        function displayWorkouts(filteredWorkouts = workouts) {
             resultsDiv.innerHTML = '<h2>Сохраненные тренировки</h2>';
 
-            if (workouts.length === 0) {
+            if (filteredWorkouts.length === 0) {
                 resultsDiv.innerHTML += '<p>Нет сохраненных тренировок.</p>';
             } else {
-                workouts.forEach((workout, index) => {
+                filteredWorkouts.forEach((workout, index) => {
                     const workoutItem = document.createElement('div');
                     workoutItem.className = 'result-item';
                     workoutItem.innerHTML = `
@@ -140,6 +204,7 @@
                         <p><strong>Длительность:</strong> ${workout.duration} мин</p>
                         <p><strong>Интенсивность:</strong> ${workout.intensity}</p>
                         <p><strong>Заметки:</strong> ${workout.notes}</p>
+                        <button onclick="editWorkout(${index})">Редактировать</button>
                         <button onclick="deleteWorkout(${index})">Удалить</button>
                     `;
                     resultsDiv.appendChild(workoutItem);
@@ -147,15 +212,100 @@
             }
         }
 
-        function deleteWorkout(index) {
-            let workouts = JSON.parse(localStorage.getItem('workouts'));
+        // Редактирование тренировки
+        function editWorkout(index) {
+            const workout = workouts[index];
+            document.getElementById('date').value = workout.date;
+            document.getElementById('exercise').value = workout.exercise;
+            document.getElementById('duration').value = workout.duration;
+            document.getElementById('intensity').value = workout.intensity;
+            document.getElementById('notes').value = workout.notes;
+
             workouts.splice(index, 1);
-            localStorage.setItem('workouts', JSON.stringify(workouts));
+            saveWorkouts();
+            displayWorkouts();
+            updateStatistics();
+            renderCalendar();
+        }
+
+        // Удаление тренировки
+        function deleteWorkout(index) {
+            workouts.splice(index, 1);
+            saveWorkouts();
+            displayWorkouts();
+            updateStatistics();
+            renderCalendar();
+        }
+
+        // Фильтрация тренировок
+        function applyFilters() {
+            const filterDate = document.getElementById('filterDate').value;
+            const filterExercise = document.getElementById('filterExercise').value.toLowerCase();
+            const filterIntensity = document.getElementById('filterIntensity').value;
+
+            const filteredWorkouts = workouts.filter(workout => {
+                return (!filterDate || workout.date === filterDate) &&
+                       (!filterExercise || workout.exercise.toLowerCase().includes(filterExercise)) &&
+                       (!filterIntensity || workout.intensity === filterIntensity);
+            });
+
+            displayWorkouts(filteredWorkouts);
+        }
+
+        // Сброс фильтров
+        function clearFilters() {
+            document.getElementById('filterDate').value = '';
+            document.getElementById('filterExercise').value = '';
+            document.getElementById('filterIntensity').value = '';
             displayWorkouts();
         }
 
-        // Отображаем сохраненные тренировки при загрузке страницы
-        displayWorkouts();
+        // Обновление статистики
+        function updateStatistics() {
+            const totalWorkouts = workouts.length;
+            const totalDuration = workouts.reduce((sum, workout) => sum + workout.duration, 0);
+
+            totalWorkoutsSpan.textContent = totalWorkouts;
+            totalDurationSpan.textContent = totalDuration;
+        }
+
+        // Рендер календаря
+        function renderCalendar() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = today.getMonth();
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+
+            let calendarHTML = '';
+            for (let i = 0; i < firstDay.getDay(); i++) {
+                calendarHTML += '<div class="calendar-day"></div>';
+            }
+
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const date = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const hasWorkout = workouts.some(workout => workout.date === date);
+                calendarHTML += `
+                    <div class="calendar-day ${hasWorkout ? 'has-workout' : ''}">
+                        ${day}
+                    </div>
+                `;
+            }
+
+            calendarDiv.innerHTML = calendarHTML;
+        }
+
+        // Экспорт данных в JSON
+        function exportData() {
+            const dataStr = JSON.stringify(workouts, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'workouts.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
     </script>
 
 </body>
